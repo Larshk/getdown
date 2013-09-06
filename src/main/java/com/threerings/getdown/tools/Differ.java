@@ -26,6 +26,7 @@ import com.samskivert.io.StreamUtil;
 import com.threerings.getdown.data.Application;
 import com.threerings.getdown.data.Digest;
 import com.threerings.getdown.data.Resource;
+import com.threerings.getdown.data.SysProps;
 
 /**
  * Generates patch files between two particular revisions of an
@@ -58,13 +59,13 @@ public class Differ
                                   ", overs=" + overs + "].");
         }
 
-        Application oapp = new Application(ovdir, null);
+        Application oapp = new Application(ovdir, null, SysProps.nameOfExtraFile());
         oapp.init(false);
         ArrayList<Resource> orsrcs = new ArrayList<Resource>();
         orsrcs.addAll(oapp.getCodeResources());
         orsrcs.addAll(oapp.getResources());
 
-        Application napp = new Application(nvdir, null);
+        Application napp = new Application(nvdir, null, SysProps.nameOfExtraFile());
         napp.init(false);
         ArrayList<Resource> nrsrcs = new ArrayList<Resource>();
         nrsrcs.addAll(napp.getCodeResources());

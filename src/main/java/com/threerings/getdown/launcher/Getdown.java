@@ -88,10 +88,10 @@ public abstract class Getdown extends Thread
 
     public Getdown (File appDir, String appId)
     {
-        this(appDir, appId, null, null, null);
+        this(appDir, appId, null, null, null, null);
     }
 
-    public Getdown (File appDir, String appId, List<Certificate> signers,
+    public Getdown (File appDir, String appId, String nameOfExtraFile, List<Certificate> signers,
                     String[] jvmargs, String[] appargs)
     {
         super("Getdown");
@@ -121,7 +121,7 @@ public abstract class Getdown extends Thread
                 "contains the '!' character, this will trigger this error.";
             fail(errmsg);
         }
-        _app = new Application(appDir, appId, signers, jvmargs, appargs);
+        _app = new Application(appDir, appId, nameOfExtraFile, signers, jvmargs, appargs);
         _startup = System.currentTimeMillis();
     }
 

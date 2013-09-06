@@ -99,7 +99,7 @@ public class GetdownApplet extends JApplet
                     }
                 }
             }
-            _getdown = new Getdown(_config.appdir, null, signers,
+            _getdown = new Getdown(_config.appdir, null, null, signers, //TODO: MHT extend support for user specified extrafile to applet 
                                    _config.jvmargs, _config.appargs) {
                 @Override
                 protected Container createContainer () {

@@ -225,9 +225,9 @@ public class Application
      *
      * @see #Application(File, String, Object[], String[], String[])
      */
-    public Application (File appdir, String appid)
+    public Application (File appdir, String appid, String nameOfExtraFile)
     {
-        this(appdir, appid, null, null, null);
+        this(appdir, appid, nameOfExtraFile, null, null, null);
     }
 
     /**
@@ -237,16 +237,18 @@ public class Application
      * @param appid usually null but a string identifier if a secondary application is desired to
      * be launched. That application will use {@code appid.class} and {@code appid.apparg} to
      * configure itself but all other parameters will be the same as the primary application.
+     * @param nameOfExtraFile
      * @param signers a list of possible signers of this application. Used to verify the digest.
      * @param jvmargs additional arguments to pass on to launched jvms.
      * @param appargs additional arguments to pass on to launched application; these will be added
      * after the args in the getdown.txt file.
      */
-    public Application (File appdir, String appid, List<Certificate> signers,
+    public Application (File appdir, String appid, String nameOfExtraFile, List<Certificate> signers,
                         String[] jvmargs, String[] appargs)
     {
         _appdir = appdir;
         _appid = appid;
+        _nameOfExtraFile = nameOfExtraFile == null ? "extra.txt" : nameOfExtraFile;
         _signers = (signers == null) ? Collections.<Certificate>emptyList() : signers;
         _config = getLocalPath(CONFIG_FILE);
         _extraJvmArgs = (jvmargs == null) ? ArrayUtil.EMPTY_STRING : jvmargs;
@@ -662,7 +664,7 @@ public class Application
         }
 
         // look for custom arguments
-        fillAssignmentListFromPairs("extra.txt", _txtJvmArgs);
+        fillAssignmentListFromPairs(_nameOfExtraFile, _txtJvmArgs);
 
         // determine whether we want to allow offline operation (defaults to false)
         _allowOffline = Boolean.parseBoolean((String)cdata.get("allow_offline"));
@@ -764,9 +766,9 @@ public class Application
     /**
      * Returns the local path to the specified resource.
      */
-    public File getLocalPath (String path)
+    public File getLocalPath (String resource)
     {
-        return new File(_appdir, path);
+      return new File(_appdir, resource);
     }
 
     /**
@@ -1669,6 +1671,7 @@ public class Application
     protected File _appdir;
     protected String _appid;
     protected File _config;
+    protected String _nameOfExtraFile;
     protected Digest _digest;
 
     protected long _version = -1;

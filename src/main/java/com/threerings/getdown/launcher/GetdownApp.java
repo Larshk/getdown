@@ -55,6 +55,9 @@ public class GetdownApp
             appId = args.get(aidx++);
         }
 
+        // check for an extraFileName specification in a sysprop
+        String nameOfExtraFile = SysProps.nameOfExtraFile();
+        
         // pass along anything after that as app args
         String[] appArgs = (aidx >= args.size()) ? null :
             args.subList(aidx, args.size()).toArray(ArrayUtil.EMPTY_STRING);
@@ -92,7 +95,7 @@ public class GetdownApp
         log.info("---------------------------------------------");
 
         try {
-            Getdown app = new Getdown(appDir, appId, null, null, appArgs) {
+            Getdown app = new Getdown(appDir, appId, nameOfExtraFile, null, null, appArgs) {
                 @Override
                 protected Container createContainer () {
                     // create our user interface, and display it

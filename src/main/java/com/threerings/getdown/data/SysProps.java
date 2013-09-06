@@ -22,7 +22,12 @@ public class SysProps
     public static String appId () {
         return System.getProperty("appid");
     }
-
+    
+    /** Configures the nameofextrafile (in lieu of passing it in argv). Usage: {@code -Dnameofextrafile=foo}. */
+    public static String nameOfExtraFile() {
+        return System.getProperty("nameofextrafile");
+    }
+    
     /** If true, disables redirection of logging into {@code launcher.log}.
      * Usage: {@code -Dno_log_redir}. */
     public static boolean noLogRedir () {
