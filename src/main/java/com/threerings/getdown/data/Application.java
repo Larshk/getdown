@@ -838,6 +838,7 @@ public class Application
     {
         status.updateStatus("m.updating_metadata");
         downloadConfigFile();
+        downloadExtraFile();
     }
 
     /**
@@ -861,7 +862,7 @@ public class Application
             // start the whole process over again
             downloadDigestFile();
             downloadConfigFile();
-
+            downloadExtraFile();
         } catch (IOException ex) {
             // if we are allowing offline execution, we want to allow the application to run in its
             // current form rather than aborting the entire process; to do this, we delete the
@@ -1139,6 +1140,7 @@ public class Application
             // caller because there's nothing we can do to automatically recover
             downloadConfigFile();
             downloadDigestFile();
+            downloadExtraFile();
             _digest = new Digest(_appdir);
             // revalidate everything if we end up downloading new metadata
             clearValidationMarkers();
@@ -1337,6 +1339,17 @@ public class Application
         throws IOException
     {
         downloadControlFile(CONFIG_FILE, false);
+    }
+    
+    /**
+     * Downloads a new copy of _nameOfExtraFile.
+     */
+    protected void downloadExtraFile ()
+        throws IOException
+    {
+        if (_nameOfExtraFile != null && _nameOfExtraFile.trim().length() > 0) {
+            downloadControlFile(_nameOfExtraFile, false);
+        }
     }
 
     /**
