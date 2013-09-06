@@ -31,13 +31,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-
 import java.security.cert.Certificate;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -57,7 +54,6 @@ import com.samskivert.swing.util.SwingUtil;
 import com.samskivert.text.MessageUtil;
 import com.samskivert.util.RunAnywhere;
 import com.samskivert.util.StringUtil;
-
 import com.threerings.getdown.data.Application.UpdateInterface.Step;
 import com.threerings.getdown.data.Application;
 import com.threerings.getdown.data.Resource;
@@ -77,6 +73,7 @@ import static com.threerings.getdown.Log.log;
 /**
  * Manages the main control for the Getdown application updater and deployment system.
  */
+@SuppressWarnings("nls")
 public abstract class Getdown extends Thread
     implements Application.StatusDisplay, ImageLoader
 {
