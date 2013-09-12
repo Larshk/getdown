@@ -12,9 +12,7 @@ import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.Reader;
 
-import com.samskivert.io.StreamUtil;
 import com.samskivert.util.StringUtil;
 
 import static com.threerings.getdown.Log.log;
@@ -29,19 +27,15 @@ public class VersionUtil
      */
     public static long readVersion (File vfile)
     {
-        FileInputStream fin = null;
         long fileVersion = -1;
-        try {
-            fin = new FileInputStream(vfile);
-            BufferedReader bin = new BufferedReader(new InputStreamReader(fin));
+        try (FileInputStream fin = new FileInputStream(vfile);
+            BufferedReader bin = new BufferedReader(new InputStreamReader(fin))) {
             String vstr = bin.readLine();
             if (!StringUtil.isBlank(vstr)) {
                 fileVersion = Long.parseLong(vstr);
             }
         } catch (Exception e) {
             log.info("Unable to read version file: " + e.getMessage());
-        } finally {
-            StreamUtil.close(fin);
         }
 
         return fileVersion;
@@ -53,13 +47,10 @@ public class VersionUtil
     public static void writeVersion (File vfile, long version)
         throws IOException
     {
-        PrintStream out = new PrintStream(new FileOutputStream(vfile));
-        try {
+        try (PrintStream out = new PrintStream(new FileOutputStream(vfile))) {
             out.println(version);
         } catch (Exception e) {
             log.warning("Unable to write version file: " + e.getMessage());
-        } finally {
-            StreamUtil.close(out);
         }
     }
 }
