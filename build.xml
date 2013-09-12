@@ -4,12 +4,13 @@
 	<property name="src.dir" value="src/main/java"/>
 	<property name="rsrc.dir" value="src/main/resources"/>
 	<property name="tsrc.dir" value="src/test/java"/>
-	<property name="deploy.dir" value="dist"/>
+	<property name="build.dir" value="build"/>
+	<property name="release.dir" value="${build.dir}/dist"/>
 
 	<taskdef name="one-jar" classname="com.simontuffs.onejar.ant.OneJarTask" classpath="${lib.dir}/one-jar-ant-task-0.97.jar" onerror="report"/>
 
 	<target name="-prepare">
-		<mkdir dir="${deploy.dir}"/>
+		<mkdir dir="${build.dir}"/>
 		<path id="compile.classpath">
 			<pathelement location="${lib.dir}/commons-lang-2.3.jar"/>
 			<pathelement location="${lib.dir}/commons-codec-1.4.jar"/>
@@ -17,45 +18,48 @@
 		</path>
 		<path id="built.classpath">
 			<path refid="compile.classpath"/>
-			<pathelement location="${deploy.dir}/classes"/>
+			<pathelement location="${build.dir}/classes"/>
 		</path>
 		<path id="test.classpath">
 			<path refid="built.classpath"/>
-			<pathelement location="${deploy.dir}/test-classes"/>
+			<pathelement location="${build.dir}/test-classes"/>
 		</path>
 	</target>
 
 	<target name="clean" description="Cleans out build results.">
-		<delete dir="${deploy.dir}/classes"/>
-		<delete dir="${deploy.dir}/test-classes"/>
-		<delete dir="${deploy.dir}/docs"/>
+		<delete dir="${build.dir}/classes"/>
+		<delete dir="${build.dir}/test-classes"/>
+		<delete dir="${build.dir}/docs"/>
 	</target>
 
 	<target name="distclean" description="Scorched earth clean.">
-		<delete dir="${deploy.dir}"/>
+		<delete dir="${build.dir}"/>
 	</target>
 
 	<target name="compile" depends="-prepare" description="Compiles main and test classes.">
-		<mkdir dir="${deploy.dir}/classes"/>
-		<mkdir dir="${deploy.dir}/test-classes"/>
+		<mkdir dir="${build.dir}/classes"/>
+		<mkdir dir="${build.dir}/test-classes"/>
 
-		<copy todir="${deploy.dir}/classes">
+		<copy todir="${build.dir}/classes">
 			<fileset dir="src/main/resources" includes="**"/>
 		</copy>
-		<javac srcdir="${src.dir}" destdir="${deploy.dir}/classes" includeAntRuntime="no"
+		<javac srcdir="${src.dir}" destdir="${build.dir}/classes" includeAntRuntime="no"
            classpathref="compile.classpath" debug="on" deprecation="on"/>
-        <!-- <javac srcdir="${tsrc.dir}" destdir="${deploy.dir}/test-classes" includeAntRuntime="false"
+        <!-- <javac srcdir="${tsrc.dir}" destdir="${build.dir}/test-classes" includeAntRuntime="false"
            classpathref="test.classpath" debug="on" deprecation="on"/> -->
 	</target>
 
 	<target name="jars" depends="compile">
-		<jar destfile="${deploy.dir}/main.jar" manifest="lib/manifest.mf">
-            <fileset dir="${deploy.dir}/classes">
+		<mkdir dir="${build.dir}/jars"/>
+		<mkdir dir="${release.dir}"/>
+			
+		<jar destfile="${build.dir}/jars/main.jar" manifest="lib/manifest.mf">
+            <fileset dir="${build.dir}/classes">
     			<include name="**/*"/>
         	</fileset>
 		</jar>
-        <one-jar destfile="getdown-sse-1.0.jar" manifest="lib/manifest.mf">
-            <main jar="${deploy.dir}/main.jar"/>
+        <one-jar destfile="${release.dir}/getdown-sse-1.0.jar" manifest="lib/manifest.mf">
+            <main jar="${build.dir}/jars/main.jar"/>
             <lib>
                 <fileset dir="${lib.dir}">
         			<include name="commons-lang-2.3.jar"/>
