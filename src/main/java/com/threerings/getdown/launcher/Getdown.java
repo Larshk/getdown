@@ -37,7 +37,6 @@ import java.net.URLConnection;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -45,10 +44,6 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import ca.beq.util.win32.registry.RegistryKey;
-import ca.beq.util.win32.registry.RegistryValue;
-import ca.beq.util.win32.registry.RootKey;
 
 import com.samskivert.swing.util.SwingUtil;
 import com.samskivert.text.MessageUtil;
@@ -120,21 +115,6 @@ public abstract class Getdown extends Thread
         }
         _app = new Application(appDir, appId, nameOfExtraFile, signers, jvmargs, appargs);
         _startup = System.currentTimeMillis();
-    }
-
-    /**
-     * This is used by the applet which always needs a user interface and wants to load it as soon
-     * as possible.
-     */
-    public void preInit ()
-    {
-        try {
-            _ifc = _app.init(true);
-            createInterface(true);
-        } catch (Exception e) {
-            log.warning("Failed to preinit: " + e);
-            createInterface(true);
-        }
     }
 
     @Override
@@ -235,41 +215,6 @@ public abstract class Getdown extends Thread
         // we may already have a proxy configured
         if (System.getProperty("http.proxyHost") != null) {
             return true;
-        }
-
-        // look in the Vinders registry
-        if (RunAnywhere.isWindows()) {
-            try {
-                String host = null, port = null;
-                boolean enabled = false;
-                RegistryKey.initialize();
-                RegistryKey r = new RegistryKey(RootKey.HKEY_CURRENT_USER, PROXY_REGISTRY);
-                for (Iterator<?> iter = r.values(); iter.hasNext(); ) {
-                    RegistryValue value = (RegistryValue)iter.next();
-                    if (value.getName().equals("ProxyEnable")) {
-                        enabled = value.getStringValue().equals("1");
-                    }
-                    if (value.getName().equals("ProxyServer")) {
-                        String strval = value.getStringValue();
-                        int cidx = strval.indexOf(":");
-                        if (cidx != -1) {
-                            port = strval.substring(cidx+1);
-                            strval = strval.substring(0, cidx);
-                        }
-                        host = strval;
-                    }
-                }
-
-                if (enabled) {
-                    setProxyProperties(host, port);
-                    return true;
-                } else {
-                    log.info("Detected no proxy settings in the registry.");
-                }
-
-            } catch (Throwable t) {
-                log.info("Failed to find proxy settings in Windows registry", "error", t);
-            }
         }
 
         // otherwise look for and read our proxy.txt file
