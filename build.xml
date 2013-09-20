@@ -58,8 +58,9 @@
     			<include name="**/*"/>
         	</fileset>
 		</jar>
-        <one-jar destfile="${release.dir}/getdown-sse-1.0.jar" manifest="lib/manifest.mf">
-            <main jar="${build.dir}/jars/main.jar"/>
+        <one-jar destfile="${release.dir}/getdown-sse-1.5.0.jar" manifest="lib/manifest.mf">
+        	<fileset dir="lib" includes="one-jar.properties"/>
+        	<main jar="${build.dir}/jars/main.jar"/>
             <lib>
                 <fileset dir="${lib.dir}">
         			<include name="commons-lang-2.3.jar"/>
