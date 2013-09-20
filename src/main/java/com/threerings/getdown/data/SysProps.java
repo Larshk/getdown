@@ -28,6 +28,11 @@ public class SysProps
         return System.getProperty("nameofextrafile");
     }
     
+    /** If true, simply launch the application in appdir without verifying it and without downloading anything **/
+    public static boolean launchOnlyMode() {
+        return System.getProperty("launch_only") != null;
+    }
+    
     /** If true, disables redirection of logging into {@code launcher.log}.
      * Usage: {@code -Dno_log_redir}. */
     public static boolean noLogRedir () {

@@ -1,1 +1,0 @@
-One-Jar-Main-Class: com.threerings.getdown.launcher.Getdown

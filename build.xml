@@ -7,8 +7,6 @@
 	<property name="build.dir" value="build"/>
 	<property name="release.dir" value="${build.dir}/dist"/>
 
-	<taskdef name="one-jar" classname="com.simontuffs.onejar.ant.OneJarTask" classpath="${lib.dir}/one-jar-ant-task-0.97.jar" onerror="report"/>
-
 	<target name="-prepare">
 		<mkdir dir="${build.dir}"/>
 		<path id="compile.classpath">
@@ -16,12 +14,12 @@
 			<pathelement location="${lib.dir}/commons-codec-1.4.jar"/>
 			<pathelement location="${lib.dir}/samskivert-1.2.jar"/>
 		</path>
-		<path id="built.classpath">
+		<path id="build.classpath">
 			<path refid="compile.classpath"/>
 			<pathelement location="${build.dir}/classes"/>
 		</path>
 		<path id="test.classpath">
-			<path refid="built.classpath"/>
+			<path refid="build.classpath"/>
 			<pathelement location="${build.dir}/test-classes"/>
 		</path>
 	</target>
@@ -38,36 +36,44 @@
 
 	<target name="compile" depends="-prepare" description="Compiles main and test classes.">
 		<mkdir dir="${build.dir}/classes"/>
-		<mkdir dir="${build.dir}/test-classes"/>
 
 		<copy todir="${build.dir}/classes">
-			<fileset dir="src/main/resources" includes="**"/>
+			<fileset dir="src/main/resources" includes="**/*"/>
 		</copy>
 		<javac srcdir="${src.dir}" destdir="${build.dir}/classes" includeAntRuntime="no"
            classpathref="compile.classpath" debug="on" deprecation="on"/>
-        <!-- <javac srcdir="${tsrc.dir}" destdir="${build.dir}/test-classes" includeAntRuntime="false"
-           classpathref="test.classpath" debug="on" deprecation="on"/> -->
 	</target>
 
 	<target name="jars" depends="compile">
-		<mkdir dir="${build.dir}/jars"/>
+		<delete failonerror="false" dir="${build.dir}/tmp"/>
+		<mkdir dir="${build.dir}/tmp"/>
 		<mkdir dir="${release.dir}"/>
+		
+		<unzip dest="${build.dir}/tmp">
+		    <patternset>
+		        <include name="**/*"/>
+		        <exclude name="META-INF/**/*"/>
+		    </patternset>
+		    <fileset dir="${lib.dir}">
+    			<include name="commons-lang-2.3.jar"/>
+    			<include name="commons-codec-1.4.jar"/>
+    			<include name="samskivert-1.2.jar"/>
+		    </fileset>
+		</unzip>
+		
+		<copy todir="${build.dir}/tmp">
+			<fileset dir="${build.dir}/classes" includes="**/*"/>
+		</copy>
 			
-		<jar destfile="${build.dir}/jars/main.jar" manifest="lib/manifest.mf">
-            <fileset dir="${build.dir}/classes">
+		<jar destfile="${release.dir}/getdown-sse-1.5.0.jar">
+            <fileset dir="${build.dir}/tmp">
     			<include name="**/*"/>
         	</fileset>
+			<manifest>
+				<attribute name="Main-Class" value="com.threerings.getdown.launcher.Getdown"/>
+			</manifest>
 		</jar>
-        <one-jar destfile="${release.dir}/getdown-sse-1.5.0.jar" manifest="lib/manifest.mf">
-        	<fileset dir="lib" includes="one-jar.properties"/>
-        	<main jar="${build.dir}/jars/main.jar"/>
-            <lib>
-                <fileset dir="${lib.dir}">
-        			<include name="commons-lang-2.3.jar"/>
-        			<include name="commons-codec-1.4.jar"/>
-        			<include name="samskivert-1.2.jar"/>
-            	</fileset>
-            </lib>
-        </one-jar>
+		
+		<delete failonerror="false" dir="${build.dir}/tmp"/>
 	</target>
 </project>

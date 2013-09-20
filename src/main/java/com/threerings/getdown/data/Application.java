@@ -330,6 +330,11 @@ public class Application
         return active;
     }
 
+    public boolean isLaunchOnlyMode()
+    {
+      return SysProps.launchOnlyMode();
+    }
+    
     /**
      * Returns all main code resources and all code resources from active auxiliary resource groups.
      */

@@ -31,9 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
+import java.net.*;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -313,6 +311,12 @@ public abstract class Getdown extends Thread
                 // now force our UI to be recreated with the updated info
                 createInterface(true);
             }
+            
+            if (_app.isLaunchOnlyMode()) {
+              launch();
+              return;
+            }
+            
             if (!_app.lockForUpdates()) {
                 throw new MultipleGetdownRunning();
             }
@@ -484,7 +488,23 @@ public abstract class Getdown extends Thread
         if (StringUtil.isBlank(path)) {
             return null;
         }
-
+        
+        URL imageURL = null;
+        try {
+          imageURL = new URL(path);
+        } catch (MalformedURLException e) {
+          // Ignore
+        }
+        
+        if (imageURL != null) {
+          try {
+            return ImageIO.read(imageURL);
+          } catch (IOException e) {
+            log.warning("Failed to load image", "url", imageURL, "error", e);
+            return null;
+          }
+        }
+        
         File imgpath = null;
         try {
             // First try for a localized image.
@@ -1171,6 +1191,4 @@ public abstract class Getdown extends Thread
     protected static final long MIN_EXIST_TIME = 5000L;
     protected static final long FALLBACK_CHECK_TIME = 1000L;
     protected static final long PLAY_AGAIN_TIME = 3000L;
-    protected static final String PROXY_REGISTRY =
-        "Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings";
 }
