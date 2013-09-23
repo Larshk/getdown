@@ -124,17 +124,19 @@ public abstract class Getdown extends Thread
             return;
         }
 
-        // determine whether or not we can write to our install directory
-        File instdir = _app.getLocalPath("");
-        if (!instdir.canWrite()) {
-            String path = instdir.getPath();
-            if (path.equals(".")) {
-                path = System.getProperty("user.dir");
-            }
-            fail(MessageUtil.tcompose("m.readonly_error", path));
-            return;
+        // determine whether or not we can write to our install directory in case we may need to download anything
+        if (!_app.isLaunchOnlyMode()) {
+          File instdir = _app.getLocalPath("");
+          if (!instdir.canWrite()) {
+              String path = instdir.getPath();
+              if (path.equals(".")) {
+                  path = System.getProperty("user.dir");
+              }
+              fail(MessageUtil.tcompose("m.readonly_error", path));
+              return;
+          }
         }
-
+        
         try {
             _dead = false;
             if (detectProxy()) {
