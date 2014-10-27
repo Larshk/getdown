@@ -1,76 +1,70 @@
 <?xml version="1.0"?>
 <project name="getdown-sse" default="compile" basedir=".">
-	<property name="target.version" value="1.5.2"/>
-	<property name="lib.dir" value="lib"/>
-	<property name="src.dir" value="src/main/java"/>
-	<property name="rsrc.dir" value="src/main/resources"/>
-	<property name="tsrc.dir" value="src/test/java"/>
-	<property name="build.dir" value="build"/>
-	<property name="release.dir" value="${build.dir}/dist"/>
+  <property name="target.version" value="1.5.3"/>
+  <property name="lib.dir" value="lib"/>
+  <property name="src.dir" value="src/main/java"/>
+  <property name="rsrc.dir" value="src/main/resources"/>
+  <property name="tsrc.dir" value="src/test/java"/>
+  <property name="build.dir" value="build"/>
+  <property name="release.dir" value="${build.dir}/dist"/>
 
-	<target name="-prepare">
-		<mkdir dir="${build.dir}"/>
-		<path id="compile.classpath">
-			<pathelement location="${lib.dir}/commons-lang-2.3.jar"/>
-			<pathelement location="${lib.dir}/commons-codec-1.4.jar"/>
-			<pathelement location="${lib.dir}/samskivert-1.2.jar"/>
-		</path>
-		<path id="build.classpath">
-			<path refid="compile.classpath"/>
-			<pathelement location="${build.dir}/classes"/>
-		</path>
-		<path id="test.classpath">
-			<path refid="build.classpath"/>
-			<pathelement location="${build.dir}/test-classes"/>
-		</path>
-	</target>
+  <target name="-prepare">
+    <mkdir dir="${build.dir}"/>
+    <path id="compile.classpath">
+      <pathelement location="${lib.dir}/commons-lang-2.3.jar"/>
+      <pathelement location="${lib.dir}/commons-codec-1.4.jar"/>
+      <pathelement location="${lib.dir}/samskivert-1.2.jar"/>
+    </path>
+    <path id="build.classpath">
+      <path refid="compile.classpath"/>
+      <pathelement location="${build.dir}/classes"/>
+    </path>
+    <path id="test.classpath">
+      <path refid="build.classpath"/>
+      <pathelement location="${build.dir}/test-classes"/>
+    </path>
+  </target>
 
-	<target name="clean" description="Cleans out build results.">
-		<delete dir="${build.dir}"/>
-	</target>
+  <target name="clean" description="Cleans out build results.">
+    <delete dir="${build.dir}"/>
+  </target>
 
-	<target name="compile" depends="-prepare" description="Compiles main and test classes.">
-		<mkdir dir="${build.dir}/classes"/>
+  <target name="compile" depends="-prepare" description="Compiles main and test classes.">
+    <mkdir dir="${build.dir}/classes"/>
 
-		<copy todir="${build.dir}/classes">
-			<fileset dir="src/main/resources" includes="**/*"/>
-		</copy>
-		<javac srcdir="${src.dir}" destdir="${build.dir}/classes" includeAntRuntime="no"
+    <copy todir="${build.dir}/classes">
+      <fileset dir="src/main/resources" includes="**/*"/>
+    </copy>
+    <javac srcdir="${src.dir}" destdir="${build.dir}/classes" includeAntRuntime="no"
            classpathref="compile.classpath" debug="on" deprecation="on"/>
-	</target>
+  </target>
 
-	<target name="jars" depends="compile">
-		<delete failonerror="false" dir="${build.dir}/tmp"/>
-		<mkdir dir="${build.dir}/tmp"/>
-		<mkdir dir="${release.dir}"/>
-		
-		<unzip dest="${build.dir}/tmp">
-		    <patternset>
-		        <include name="**/*"/>
-		        <exclude name="META-INF/**/*"/>
-		    </patternset>
-		    <fileset dir="${lib.dir}">
-    			<include name="commons-lang-2.3.jar"/>
-    			<include name="commons-codec-1.4.jar"/>
-    			<include name="samskivert-1.2.jar"/>
-		    </fileset>
-		</unzip>
-		
-		<copy todir="${build.dir}/tmp">
-			<fileset dir="${build.dir}/classes" includes="**/*"/>
-		</copy>
-			
-		<jar destfile="${release.dir}/getdown-sse-${target.version}.jar">
-            <fileset dir="${build.dir}/tmp">
-    			<include name="**/*"/>
-        	</fileset>
-			<manifest>
-				<attribute name="Main-Class" value="com.threerings.getdown.launcher.Getdown"/>
-				<attribute name="Specification-Title" value="getdown-sse"/>
-				<attribute name="Specification-Version" value="${target.version}"/>
-			</manifest>
-		</jar>
-		
-		<delete failonerror="false" dir="${build.dir}/tmp"/>
-	</target>
+  <target name="jars" depends="compile">
+    <delete failonerror="false" dir="${release.dir}"/>
+    <mkdir dir="${release.dir}"/>
+    
+    <jar destfile="${release.dir}/getdown-sse-${target.version}.jar">
+      <fileset dir="${build.dir}/classes">
+        <include name="**/*"/>
+      </fileset>
+      <manifest>
+        <attribute name="Main-Class" value="com.threerings.getdown.launcher.Getdown"/>
+        <attribute name="Specification-Title" value="getdown-sse"/>
+        <attribute name="Specification-Version" value="${target.version}"/>
+        <attribute name="Component-Version" value="${target.version}"/>
+        <attribute name="Implementation-Version" value="${target.version}"/>
+        <attribute name="Class-Path" value="commons-lang-2.3.jar commons-codec-1.4.jar samskivert-1.2.jar"/>
+      </manifest>
+    </jar>
+    
+    <copy todir="${release.dir}">
+      <fileset dir="${lib.dir}">
+        <include name="commons-lang-2.3.jar"/>
+        <include name="commons-codec-1.4.jar"/>
+        <include name="samskivert-1.2.jar"/>
+      </fileset>
+    </copy>
+    
+    <zip destfile="${release.dir}/getdown-sse-${target.version}.zip" basedir="${release.dir}" includes="*.jar"/>
+  </target>
 </project>

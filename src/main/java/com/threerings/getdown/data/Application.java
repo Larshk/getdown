@@ -674,9 +674,9 @@ public class Application
         // determine whether we want to allow offline operation (defaults to false)
         _allowOffline = Boolean.parseBoolean((String)cdata.get("allow_offline"));
 
-        // look for a debug.txt file which causes us to run in java.exe on Windows so that we can
+        // look for a windebug.txt file which causes us to run in java.exe on Windows so that we can
         // obtain a thread dump of the running JVM
-        _windebug = getLocalPath("debug.txt").exists();
+        _windebug = getLocalPath("windebug.txt").exists();
 
         // parse and return our application config
         UpdateInterface ui = new UpdateInterface();
