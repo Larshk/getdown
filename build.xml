@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="getdown-sse" default="compile" basedir=".">
-  <property name="target.version" value="1.5.4"/>
+  <property name="target.version" value="1.5.3"/>
   <property name="lib.dir" value="lib"/>
   <property name="src.dir" value="src/main/java"/>
   <property name="rsrc.dir" value="src/main/resources"/>
