@@ -248,7 +248,7 @@ public class Application
     {
         _appdir = appdir;
         _appid = appid;
-        _nameOfExtraFile = nameOfExtraFile == null ? "extra.txt" : nameOfExtraFile;
+        _nameOfExtraFile = nameOfExtraFile;
         _signers = (signers == null) ? Collections.<Certificate>emptyList() : signers;
         _config = getLocalPath(CONFIG_FILE);
         _extraJvmArgs = (jvmargs == null) ? ArrayUtil.EMPTY_STRING : jvmargs;
@@ -741,6 +741,10 @@ public class Application
      */
     protected void fillAssignmentListFromPairs (String pairLocation, List<String> collector)
     {
+        if (pairLocation == null || pairLocation.trim().length() == 0) {
+          return;
+        }
+      
         File pairFile = getLocalPath(pairLocation);
         if (pairFile.exists()) {
             try {
