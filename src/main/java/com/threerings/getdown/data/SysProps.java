@@ -13,6 +13,11 @@ package com.threerings.getdown.data;
  */
 public class SysProps
 {
+    /** Configures the appjvm (in lieu of passing it in argv). Usage: {@code -Dappjvm=foo}. */
+    public static String appJvm () {
+        return System.getProperty("appjvm");
+    }
+
     /** Configures the appdir (in lieu of passing it in argv). Usage: {@code -Dappdir=foo}. */
     public static String appDir () {
         return System.getProperty("appdir");

@@ -74,7 +74,7 @@ public class GetdownApp
             File logFile = new File(appDir, "launcher.log");
             try {
                 PrintStream logOut = new PrintStream(
-                    new BufferedOutputStream(new FileOutputStream(logFile)), true);
+                        new BufferedOutputStream(new FileOutputStream(logFile, true)), true);
                 System.setOut(logOut);
                 System.setErr(logOut);
             } catch (IOException ioe) {

@@ -13,6 +13,7 @@ import java.io.PrintStream;
 import com.samskivert.io.StreamUtil;
 import com.samskivert.util.RunAnywhere;
 import com.samskivert.util.StringUtil;
+import com.threerings.getdown.data.SysProps;
 
 import static com.threerings.getdown.Log.log;
 
@@ -49,7 +50,7 @@ public class LaunchUtil
      */
     public static boolean updateVersionAndRelaunch (
             File appdir, String getdownJarName, String newVersion)
-        throws IOException
+            throws IOException
     {
         // create the file that instructs Getdown to upgrade
         File vfile = new File(appdir, "version.txt");
@@ -65,7 +66,7 @@ public class LaunchUtil
 
         // do the deed
         String[] args = new String[] {
-            getJVMPath(appdir), "-jar", pro.toString(), appdir.getPath()
+                getJVMPath(appdir), "-jar", pro.toString(), appdir.getPath()
         };
         log.info("Running " + StringUtil.join(args, "\n  "));
         try {
@@ -86,14 +87,27 @@ public class LaunchUtil
     }
 
     /**
-     * Reconstructs the path to the JVM used to launch this process.
+     * Constructs the path to the JVM used to launch this process.
      *
      * @param windebug if true we will use java.exe instead of javaw.exe on Windows.
      */
     public static String getJVMPath (File appdir, boolean windebug)
     {
-        // first look in our application directory for an installed VM
-        String vmpath = checkJVMPath(new File(appdir, LOCAL_JAVA_DIR).getPath(), windebug);
+        String vmpath = null;
+        // first we look for a command line defined jvm
+        String appJvm = SysProps.appJvm();
+        if(appJvm != null){
+            vmpath = checkJVMPath(appJvm, windebug);
+            if(vmpath == null){
+                log.warning("Unable to find java defined by system property"
+                        + " [appjvm=" + SysProps.appJvm() + "]!");
+            }
+        }
+
+        // look in our application directory for an installed VM if no specified JVM is found
+        if (vmpath == null) {
+            checkJVMPath(new File(appdir, LOCAL_JAVA_DIR).getPath(), windebug);
+        }
 
         // then fall back to the VM in which we're already running
         if (vmpath == null) {
@@ -103,7 +117,7 @@ public class LaunchUtil
         // then throw up our hands and hope for the best
         if (vmpath == null) {
             log.warning("Unable to find java [appdir=" + appdir +
-                        ", java.home=" + System.getProperty("java.home") + "]!");
+                    ", java.home=" + System.getProperty("java.home") + "]!");
             vmpath = "java";
         }
 

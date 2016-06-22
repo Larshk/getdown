@@ -10,5 +10,7 @@ For further information, check out https://github.com/threerings/getdown
 - Supports the system property nameofextrafile specifying the name of the extrafile
 - Supports downloading the extrafile without specifying it as a resource
 - Supports read-only mode for systems that have a pre-installed local folder and users without write permission
+- Supports definition of Application JMV via the system property appjvm
 - Stripped down version without the applet
+- Appending to launcher.log
 - Compiled for Java 7
