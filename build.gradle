@@ -1,0 +1,91 @@
+plugins {
+  id 'nebula.release' version '6.1.0'
+}
+//apply plugin: 'nebula.integtest-standalone'
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+apply plugin: 'application'
+
+apply plugin: 'project-report'
+htmlDependencyReport {
+  projects = project.allprojects
+}
+
+mainClassName = "com.threerings.getdown.launcher.Getdown"
+
+jar {
+  manifest {
+    attributes 'Main-Class': 'com.threerings.getdown.launcher.Getdown',
+        'Class-Path': 'commons-lang-2.3.jar commons-codec-1.4.jar samskivert-1.2.jar',
+        'Specification-Version': "${version}",
+        'Component-Version': "${version}",
+        'Implementation-Version': "${version}",
+        'Specification-Title': 'getdown-sse'
+  }
+}
+
+nebulaRelease {
+  releaseBranchPatterns = [/master/, /HEAD/, "((release|maintenence)[-|/])?v?\\d+(\\.\\d+)?\\.[x|\\d+]"] as Set
+  shortenedBranchPattern = /(?:(?:bugfix|feature|hotfix|release|maintenence)(?:-|\/))?(.+)/
+}
+
+tasks.release.dependsOn tasks.build
+tasks.postRelease.finalizedBy tasks.publish
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation group: 'commons-codec', name: 'commons-codec', version: '1.4'
+  implementation group: 'commons-lang', name: 'commons-lang', version: '2.3'
+  implementation group: 'com.samskivert', name: 'samskivert', version: '1.2'
+  
+  testImplementation group: 'junit', name: 'junit', version: '4.12'
+  
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+task sourceJar(type: Jar) {
+  from sourceSets.main.allJava
+}
+
+publishing {
+  publications {
+    jar(MavenPublication) {
+      from components.java
+    
+      artifact sourceJar {
+        classifier "sources"
+      }
+    }
+    
+    zip(MavenPublication) {
+      artifactId project.name + "-dist-zip"
+      artifact distZip {
+        classifier ""
+      }
+    }
+  
+    tar(MavenPublication) {
+      artifactId project.name + "-dist-tar"
+      artifact distTar {
+        classifier ""
+      }
+    }
+  }
+}
+
+publishing {
+  repositories {
+    maven {
+      credentials {
+        username project.properties["nexus_username"]
+        password project.properties["nexus_password"]
+      }
+      url project.properties["maven_url"]
+    }
+  }
+}

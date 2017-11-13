@@ -1,0 +1,21 @@
+test {
+    scanForTestClasses false
+    include 'com/systematic/columna/cdagenerator/generator/UnitTestSuite**'
+    workingDir 'build/resources/test'
+    systemProperties = systemProperties + [
+            'resources_test_home': new File('src/test/resources').getAbsolutePath(),
+            'user.country': 'DK',
+            'user.language': 'da',
+            'is.running.junit':'true'
+    ]
+}
+
+/**
+ * Integration test
+ */
+task showUnitTestReport(type:Exec) {
+    group 'verification'
+    description 'Show the test report for the latest unit test run'
+    workingDir './build/reports/tests/test'
+    commandLine 'cmd', '/c', 'start index.html'
+}
