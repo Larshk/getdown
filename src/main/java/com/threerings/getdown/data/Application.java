@@ -899,12 +899,12 @@ public class Application
         throws IOException
     {
         // create our classpath
-        StringBuilder cpbuf = new StringBuilder();
+        List<String> cpbuf = new ArrayList<>(getActiveCodeResources().size());
         for (Resource rsrc : getActiveCodeResources()) {
-            if (cpbuf.length() > 0) {
-                cpbuf.append(File.pathSeparator);
-            }
-            cpbuf.append(rsrc.getLocal().getAbsolutePath());
+            Path appDir = _appdir.toPath();
+            Path jarFile = rsrc.getLocal().toPath();
+
+            cpbuf.add(appDir.relativize(jarFile).toString());
         }
 
         ArrayList<String> args = new ArrayList<String>();
@@ -914,7 +914,7 @@ public class Application
 
         // add the classpath arguments
         args.add("-classpath");
-        args.add(cpbuf.toString());
+        args.add(String.join(File.pathSeparator, cpbuf));
 
         // we love our Mac users, so we do nice things to preserve our application identity
         if (RunAnywhere.isMacOS()) {
