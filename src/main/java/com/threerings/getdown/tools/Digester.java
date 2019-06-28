@@ -16,9 +16,8 @@ import java.security.PrivateKey;
 import java.security.Signature;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
-
-import org.apache.commons.codec.binary.Base64;
 
 import com.threerings.getdown.data.Application;
 import com.threerings.getdown.data.Digest;
@@ -119,7 +118,7 @@ public class Digester
           
           // Write out the signature
           signatureOutput = new FileOutputStream(signatureFile);
-          String signed = new String(Base64.encodeBase64(sig.sign()));
+          String signed = new String(Base64.getEncoder().encode(sig.sign()));
           signatureOutput.write(signed.getBytes("utf8"));
         } finally {
             if (dataInput != null) {

@@ -26,6 +26,7 @@ import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.nio.file.Path;
 import java.security.AllPermission;
 import java.security.CodeSource;
 import java.security.GeneralSecurityException;
@@ -33,23 +34,12 @@ import java.security.PermissionCollection;
 import java.security.Permissions;
 import java.security.Signature;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map.Entry;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JApplet;
-
-import org.apache.commons.codec.binary.Base64;
 
 import com.samskivert.io.StreamUtil;
 import com.samskivert.text.MessageUtil;
@@ -223,7 +213,7 @@ public class Application
     /**
      * Creates an application instance with no signers.
      *
-     * @see #Application(File, String, Object[], String[], String[])
+     * @see #Application(File, String, String, List, String[], String[])
      */
     public Application (File appdir, String appid, String nameOfExtraFile)
     {
@@ -669,7 +659,7 @@ public class Application
         }
 
         // look for custom arguments
-        fillAssignmentListFromPairs(_nameOfExtraFile, _txtJvmArgs);
+        fillAssignmentListFromPairs(_nameOfExtraFile, (key, value) -> _txtJvmArgs.add(key + "=" + value));
 
         // determine whether we want to allow offline operation (defaults to false)
         _allowOffline = Boolean.parseBoolean((String)cdata.get("allow_offline"));
@@ -739,7 +729,7 @@ public class Application
     /**
      * Adds strings of the form pair0=pair1 to collector for each pair parsed out of pairLocation.
      */
-    protected void fillAssignmentListFromPairs (String pairLocation, List<String> collector)
+    protected void fillAssignmentListFromPairs (String pairLocation, BiConsumer<String,String> collector)
     {
         if (pairLocation == null || pairLocation.trim().length() == 0) {
           return;
@@ -751,9 +741,9 @@ public class Application
                 List<String[]> args = ConfigUtil.parsePairs(pairFile, false);
                 for (String[] pair : args) {
                     if (pair[1].length() == 0) {
-                        collector.add(pair[0]);
+                        collector.accept(pair[0], null);
                     } else {
-                        collector.add(pair[0] + "=" + pair[1]);
+                        collector.accept(pair[0] , pair[1]);
                     }
                 }
             } catch (Throwable t) {
@@ -966,11 +956,15 @@ public class Application
             args.add(processArg(string));
         }
 
-        String[] envp = createEnvironment();
-        String[] sargs = args.toArray(new String[args.size()]);
-        log.info("Running " + StringUtil.join(sargs, "\n  "));
+        Map<String,String> envp = createEnvironment();
+        log.info("Running " + String.join("\n", args));
 
-        return Runtime.getRuntime().exec(sargs, envp, _appdir);
+        ProcessBuilder procBuilder = new ProcessBuilder();
+        procBuilder.directory(_appdir);
+        procBuilder.environment().putAll(envp);
+        procBuilder.command(args);
+        procBuilder.inheritIO();
+        return procBuilder.start();
     }
 
     /**
@@ -979,25 +973,22 @@ public class Application
      * If the application didn't provide any environment variables, null is returned to just use
      * the existing environment.
      */
-    protected String[] createEnvironment ()
+    protected Map<String,String> createEnvironment ()
     {
-        List<String> envvar = new ArrayList<String>();
-        fillAssignmentListFromPairs("env.txt", envvar);
-        if (envvar.isEmpty()) {
+        Map<String,String> envAssignments = new TreeMap<>();
+
+        fillAssignmentListFromPairs("env.txt", envAssignments::put);
+        if (envAssignments.isEmpty()) {
             log.info("Didn't find any custom environment variables, not setting any.");
             return null;
         }
 
-        List<String> envAssignments = new ArrayList<String>();
-        for (String assignment : envvar) {
-            envAssignments.add(processArg(assignment));
-        }
-        for (Entry<String, String> environmentEntry : System.getenv().entrySet()) {
-            envAssignments.add(environmentEntry.getKey() + "=" + environmentEntry.getValue());
-        }
-        String[] envp = envAssignments.toArray(new String[envAssignments.size()]);
-        log.info("Environment " + StringUtil.join(envp, "\n "));
-        return envp;
+        // replace appdir & version
+        envAssignments.replaceAll((key, value) -> processArg(value));
+        envAssignments.putAll(System.getenv());
+        log.info("Environment " + envAssignments.entrySet().stream().map(entry -> entry.getKey()
+                 + "=" + Objects.toString(entry.getValue(), "")));
+        return envAssignments;
     }
 
     /**
@@ -1056,16 +1047,9 @@ public class Application
 
         try {
             Class<?> appclass = loader.loadClass(_class);
-            String[] args = _appargs.toArray(new String[_appargs.size()]);
-            Method main;
-            try {
-                // first see if the class has a special applet-aware main
-                main = appclass.getMethod("main", JApplet.class, SA_PROTO.getClass());
-                main.invoke(null, new Object[] { applet, args });
-            } catch (NoSuchMethodException nsme) {
-                main = appclass.getMethod("main", SA_PROTO.getClass());
-                main.invoke(null, new Object[] { args });
-            }
+            String[] args = _appargs.toArray(new String[0]);
+            Method main = appclass.getMethod("main", SA_PROTO.getClass());
+            main.invoke(null, new Object[] { args });
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }
@@ -1466,7 +1450,8 @@ public class Application
                             sig.update(buffer, 0, length);
                         }
 
-                        if (!sig.verify(Base64.decodeBase64(signature))) {
+
+                        if (!sig.verify(Base64.getDecoder().decode(signature))) {
                             log.info("Signature does not match", "cert", cert.getPublicKey());
                             continue;
                         } else {

@@ -11,8 +11,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 
-import org.apache.commons.codec.binary.Base64;
-
 public class ConnectionUtil
 {
     /**
@@ -29,7 +27,8 @@ public class ConnectionUtil
             // Remove any percent-encoding in the username/password
             userInfo = URLDecoder.decode(userInfo, "UTF-8");
             // Now base64 encode the auth info and make it a single line
-            String encoded = Base64.encodeBase64String(userInfo.getBytes("UTF-8")).
+
+            String encoded = new String(java.util.Base64.getEncoder().encode(userInfo.getBytes("UTF-8"))).
                 replaceAll("\\n","").replaceAll("\\r", "");
             conn.setRequestProperty("Authorization", "Basic " + encoded);
         }
